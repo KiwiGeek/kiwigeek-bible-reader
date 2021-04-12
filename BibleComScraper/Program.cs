@@ -1,6 +1,5 @@
-﻿using System;
-using System.Net;
-using Microsoft.Data.Sqlite;
+﻿using Microsoft.Data.Sqlite;
+using System;
 
 namespace BibleComScraper
 {
@@ -31,9 +30,9 @@ namespace BibleComScraper
                     Console.WriteLine("Language is unsupported or incorrect, or something else went terribly wrong.");
                 }
             }
-          
+
             Console.WriteLine(langPage);
-            
+
             using (var connection = new SqliteConnection("Data Source=bible.db"))
             {
                 connection.Open();
@@ -51,7 +50,7 @@ namespace BibleComScraper
         }
 
 
-        
+
 
 
     }
