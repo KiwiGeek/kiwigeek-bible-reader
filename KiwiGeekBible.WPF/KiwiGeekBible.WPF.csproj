@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>KiwiGeekBible.WPF</RootNamespace>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Telerik.UI.for.Wpf.NetCore.Xaml" Version="2021.1.325" />
+  </ItemGroup>
+  
+  <ItemGroup>
+  <ApplicationDefinition Include="App.xaml">
+    <Generator>MSBuild:Compile</Generator>
+    <SubType>Designer</SubType>
+  </ApplicationDefinition>
+  <Page Include="MainWindow.xaml">
+    <Generator>MSBuild:Compile</Generator>
+    <SubType>Designer</SubType>
+  </Page>
+  <Compile Include="App.xaml.cs">
+    <DependentUpon>App.xaml</DependentUpon>
+    <SubType>Code</SubType>
+  </Compile>
+  <Compile Include="Bible.cs" />
+  <Compile Include="Book.cs" />
+  <Compile Include="Chapter.cs" />
+  <Compile Include="IBibleTranslation.cs" />
+  <Compile Include="MainWindow.xaml.cs">
+    <DependentUpon>MainWindow.xaml</DependentUpon>
+    <SubType>Code</SubType>
+  </Compile>
+  <Compile Include="NKJVTranslation.cs" />
+  <Compile Include="ParsedReference.cs" />
+  <Compile Include="Verse.cs" />
+</ItemGroup>
+
+</Project>
