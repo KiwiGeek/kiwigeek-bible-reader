@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 
 namespace BibleComScraper
@@ -13,7 +14,7 @@ namespace BibleComScraper
 
             // see if the page exists in the page cache;
             var pageInCache = pageCache.IsPageCached(url);
-            Console.WriteLine((pageInCache ? "page is already in cache" : "page is not in cache"));
+            Debug.WriteLine((pageInCache ? "page is already in cache" : "page is not in cache"));
             if (pageInCache && !ignoreCache)
             {
                 return pageCache.GetPage(url);
