@@ -8,9 +8,9 @@ namespace BibleComScraper
 {
     class Program
     {
-        private static HttpService http = new HttpService();
+        private static readonly HttpService Http = new HttpService();
 
-        static void Main(string[] args)
+        static void Main()
         {
 
             Console.WriteLine("bible.com scraper\n-=≡=-=≡=-=≡=-=≡=-\n\n");
@@ -27,7 +27,7 @@ namespace BibleComScraper
 
                 try
                 {
-                    langPage = http.GetPage($"https://www.bible.com/languages/{languageCode}");
+                    langPage = Http.GetPage($"https://www.bible.com/languages/{languageCode}");
                 }
                 catch
                 {
@@ -48,19 +48,6 @@ namespace BibleComScraper
                 Console.WriteLine($"\t: {m.Groups["name"]}");
             }
 
-            // get a translation
-            Console.WriteLine("Possible translations: ");
-
-            Regex translationsReg = new Regex("<a role=button target=_self class=\"db pb2 lh-copy yv-green link\" href=(?<url>\\/versions\\/(?<slug>(?<code>\\d*)-.*?))>(?<name>.*?)<\\/a>");
-            MatchCollection results = translationsReg.Matches(langPage);
-            foreach (Match m in results)
-            {
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.Write(m.Groups["code"].ToString());
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.WriteLine($"\t: {m.Groups["name"]}");
-            }
-
             string startingPageContent = string.Empty;
             string translationCode = string.Empty;
             while (string.IsNullOrWhiteSpace(startingPageContent))
@@ -75,35 +62,9 @@ namespace BibleComScraper
                 {
                     string startingUrl = "https://www.bible.com" + results
                                              .FirstOrDefault(f => f.Groups["code"].ToString() == translationCode)
-                                             .Groups["url"].ToString();
+                                             ?.Groups["url"];
 
-                    startingPageContent = http.GetPage(startingUrl);
-
-                }
-                catch
-                {
-                    Console.WriteLine(
-                        "Translation code is unsupported or incorrect, or something else went terribly wrong.");
-                }
-            }
-
-            string startingPageContent = string.Empty;
-            string translationCode = string.Empty;
-            while (string.IsNullOrWhiteSpace(startingPageContent))
-            {
-                Console.Write("Enter translation code [114]: ");
-                Console.ForegroundColor = ConsoleColor.White;
-                translationCode = Console.ReadLine();
-                if (string.IsNullOrWhiteSpace(translationCode)) translationCode = "114";
-                translationCode = translationCode.ToLower();
-
-                try
-                {
-                    string startingUrl = "https://www.bible.com" + results
-                                             .FirstOrDefault(f => f.Groups["code"].ToString() == translationCode)
-                                             .Groups["url"].ToString();
-
-                    startingPageContent = http.GetPage(startingUrl);
+                    startingPageContent = Http.GetPage(startingUrl);
 
                 }
                 catch
@@ -122,10 +83,11 @@ namespace BibleComScraper
             // we need to collate the Bible Metadata
             string bibleName = results
                 .FirstOrDefault(f => f.Groups["code"].ToString() == translationCode)
-                .Groups["name"].ToString();
+                ?.Groups["name"].ToString();
             string bibleCode = Regex.Match(firstChapterUrl, ".*\\.(.+?)$").Groups[1].Value;
 
-            using (var connection = new SqliteConnection("Data Source=bible.db"))
+
+            try
             {
                 if (File.Exists($"{bibleCode}.bible.db"))
                 {
@@ -142,10 +104,11 @@ namespace BibleComScraper
             {
                 connection.Open();
 
-                var command = connection.CreateCommand();
-                command.CommandText = "SELECT 1";
-                var reader = command.ExecuteScalar().ToString();
-                Console.WriteLine(reader.ToString());
+                // Create the translation metadata
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "CREATE TABLE translation_metadata (key TEXT, value TEXT)";
+                    command.ExecuteNonQuery();
 
                     command.CommandText = "INSERT INTO translation_metadata (key, value) VALUES ($key, $value)";
                     command.Parameters.AddWithValue("$key", "name");
@@ -156,7 +119,6 @@ namespace BibleComScraper
                     command.Parameters.AddWithValue("$key", "code");
                     command.Parameters.AddWithValue("$value", bibleCode);
                     command.ExecuteNonQuery();
-
                 }
 
                 // get all the books of a specific translation
