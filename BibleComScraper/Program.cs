@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace BibleComScraper
 {
-    class Program
+    static class Program
     {
         private static readonly HttpService Http = new HttpService();
 
@@ -119,6 +119,20 @@ namespace BibleComScraper
                     command.Parameters.AddWithValue("$key", "code");
                     command.Parameters.AddWithValue("$value", bibleCode);
                     command.ExecuteNonQuery();
+                }
+                
+                // create the worker queue and load in the first worker item.
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "CREATE TABLE worker_queue (id TEXT, type TEXT, url TEXT)";
+                    command.ExecuteNonQueryAsync();
+
+                    command.CommandText = "INSERT INTO worker_queue (id, type, url) VALUES ($id, $type, $url)";
+                    command.Parameters.AddWithValue("$id", Guid.NewGuid().ToString());
+                    command.Parameters.AddWithValue("$type", "ENUMERATE_BOOKS");
+                    command.Parameters.AddWithValue("$url",
+                        $"https://www.bible.com/json/bible/books/{translationCode}");
+                    command.ExecuteNonQueryAsync();
                 }
 
                 // get all the books of a specific translation
