@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Data.Sqlite;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Data.Sqlite;
 
-namespace BibleComScraper
+namespace BibleComScraper.Services
 {
-    class PageCache
+    class PageCacheService
     {
         private SqliteConnection pageCache = new SqliteConnection("Data Source=page_cache.db");
 
-        public PageCache()
+        public PageCacheService()
         {
 
             pageCache.Open();
@@ -66,7 +61,7 @@ namespace BibleComScraper
             }
         }
 
-        ~PageCache()
+        ~PageCacheService()
         {
             pageCache.Close();
         }

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Net;
 
-namespace BibleComScraper
+namespace BibleComScraper.Services
 {
     class HttpService
     {
 
-        private PageCache pageCache = new PageCache();
+        private PageCacheService pageCache = new PageCacheService();
 
         public string GetPage(string url, bool ignoreCache = false)
         {
