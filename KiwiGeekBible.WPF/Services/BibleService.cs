@@ -23,7 +23,7 @@ namespace KiwiGeekBible.WPF.Services
         {
             get
             {
-                return $"Versions/{BibleCode}.bible.db";
+                return $"Translations/{BibleCode}.bible.db";
             }
         }
 

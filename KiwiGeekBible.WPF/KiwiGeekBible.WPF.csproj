@@ -40,7 +40,7 @@
 </ItemGroup>
   
   <ItemGroup>
-    <None Include="Versions\NKJV.bible.db">
+    <None Include="Translations\NKJV.bible.db">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
