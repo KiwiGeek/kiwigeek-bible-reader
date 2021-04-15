@@ -1,14 +1,16 @@
-﻿using Microsoft.Data.Sqlite;
-using System;
-using System.IO;
+﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using BibleComScraper.Classes;
+using BibleComScraper.Enums;
+using BibleComScraper.Services;
 
 namespace BibleComScraper
 {
     static class Program
     {
         private static readonly HttpService Http = new HttpService();
+        private static BibleService _bible;
 
         static void Main()
         {
@@ -38,7 +40,9 @@ namespace BibleComScraper
             // get a translation
             Console.WriteLine("Possible translations: ");
 
-            Regex translationsReg = new Regex("<a role=button target=_self class=\"db pb2 lh-copy yv-green link\" href=(?<url>\\/versions\\/(?<slug>(?<code>\\d*)-.*?))>(?<name>.*?)<\\/a>");
+            Regex translationsReg =
+                new Regex(
+                    "<a role=button target=_self class=\"db pb2 lh-copy yv-green link\" href=(?<url>\\/versions\\/(?<slug>(?<code>\\d*)-.*?))>(?<name>.*?)<\\/a>");
             MatchCollection results = translationsReg.Matches(langPage);
             foreach (Match m in results)
             {
@@ -61,8 +65,8 @@ namespace BibleComScraper
                 try
                 {
                     string startingUrl = "https://www.bible.com" + results
-                                             .FirstOrDefault(f => f.Groups["code"].ToString() == translationCode)
-                                             ?.Groups["url"];
+                        .FirstOrDefault(f => f.Groups["code"].ToString() == translationCode)
+                        ?.Groups["url"];
 
                     startingPageContent = Http.GetPage(startingUrl);
 
@@ -86,12 +90,17 @@ namespace BibleComScraper
                 ?.Groups["name"].ToString();
             string bibleCode = Regex.Match(firstChapterUrl, ".*\\.(.+?)$").Groups[1].Value;
 
+            _bible = new BibleService(bibleCode, bibleName, uint.Parse(translationCode));
 
             try
             {
-                if (File.Exists($"{bibleCode}.bible.db"))
+                if (_bible.DatabaseExists)
                 {
-                    File.Delete($"{bibleCode}.bible.db");
+                    Console.Write("Bible DB already exists.  RESET or RESUME [resume]: ");
+                    if (Console.ReadLine()?.ToUpper().Trim() == "RESET")
+                    {
+                        _bible.DeleteDatabase();
+                    }
                 }
             }
             catch
@@ -100,51 +109,81 @@ namespace BibleComScraper
                 return;
             }
 
-            using (var connection = new SqliteConnection($"Data Source={bibleCode}.bible.db"))
+            _bible.InitializeDatabase();
+
+            // pull a job from the queue and process.  Then wait a random number of seconds.
+            bool done = false;
+            while (!done)
             {
-                connection.Open();
-
-                // Create the translation metadata
-                using (var command = connection.CreateCommand())
-                {
-                    command.CommandText = "CREATE TABLE translation_metadata (key TEXT, value TEXT)";
-                    command.ExecuteNonQuery();
-
-                    command.CommandText = "INSERT INTO translation_metadata (key, value) VALUES ($key, $value)";
-                    command.Parameters.AddWithValue("$key", "name");
-                    command.Parameters.AddWithValue("$value", bibleName);
-                    command.ExecuteNonQuery();
-
-                    command.Parameters.Clear();
-                    command.Parameters.AddWithValue("$key", "code");
-                    command.Parameters.AddWithValue("$value", bibleCode);
-                    command.ExecuteNonQuery();
-                }
                 
-                // create the worker queue and load in the first worker item.
-                using (var command = connection.CreateCommand())
-                {
-                    command.CommandText = "CREATE TABLE worker_queue (id TEXT, type TEXT, url TEXT)";
-                    command.ExecuteNonQueryAsync();
+                Console.WriteLine($"Jobs remaining: {_bible.JobsRemaining}");
 
-                    command.CommandText = "INSERT INTO worker_queue (id, type, url) VALUES ($id, $type, $url)";
-                    command.Parameters.AddWithValue("$id", Guid.NewGuid().ToString());
-                    command.Parameters.AddWithValue("$type", "ENUMERATE_BOOKS");
-                    command.Parameters.AddWithValue("$url",
-                        $"https://www.bible.com/json/bible/books/{translationCode}");
-                    command.ExecuteNonQueryAsync();
+                Job job = _bible.GetRandomJob();
+
+                Console.WriteLine($"Got job {job.Id} which is an {job.Type} job");
+                switch (job.Type)
+                {
+                    case JobTypes.EnumerateBooks:
+                        EnumerateBooks(job);
+                        break;
+                    case JobTypes.EnumerateChapters:
+                        EnumerateChapters(job);
+                        break;
+                    case JobTypes.EnumerateVerses:
+                        break;
+                    default:
+                        throw new InvalidOperationException("Unknown job type");
                 }
 
-                // get all the books of a specific translation
-                // https://www.bible.com/json/bible/books/296
-                // get all the chapters of a specific book
-                // https://www.bible.com/json/bible/books/296/GEN/chapters
+                _bible.DeleteJob(job);
+                done = (_bible.JobsRemaining == 0);
 
-                connection.Close();
+                Console.WriteLine("Job finished");
+                //Console.ReadKey();
             }
 
+            Console.WriteLine("All Done");
             Console.ReadKey();
 
+        }
+
+       
+        private static void EnumerateBooks(Job job)
+        {
+            uint i = 0;
+            string bookPage = Http.GetPage(job.Url);
+            Regex booksRegex = new Regex("\"human\":\"(?<name>.*?)\",\"usfm\":\"(?<abbr>.*?)\"");
+            MatchCollection booksMatches = booksRegex.Matches(bookPage);
+            foreach (Match m in booksMatches)
+            {
+                Book newBook = new Book(i, m.Groups["name"].Value, m.Groups["abbr"].Value);
+                _bible.AddBook(newBook);
+                _bible.CreateJob(JobTypes.EnumerateChapters,
+                    $"https://www.bible.com/json/bible/books/{_bible.TranslationCode}/{newBook.Code}/chapters");
+                
+                i++;
+            }
+        } 
+        
+        private static void EnumerateChapters(Job job)
+        {
+
+            // extract the book code from the Url
+            string bookCode = Regex.Match(job.Url, "\\d+\\/(?<code>.*?)\\/").Groups["code"].Value;
+
+            uint i = 0;
+            string chaptersPage = Http.GetPage(job.Url);
+            Regex chapterRegex = new Regex("\"human\":\"(?<name>.*?)\",\"usfm\":\"(?<url>.*?)\"");
+            MatchCollection chaptersMatches = chapterRegex.Matches(chaptersPage);
+            foreach (Match m in chaptersMatches)
+            {
+                string chapterUrl = m.Groups["url"].Value;
+                Chapter newChapter = new Chapter(bookCode, i, m.Groups["name"].Value);
+                _bible.AddChapter(newChapter);
+                _bible.CreateJob(JobTypes.EnumerateVerses,
+                    $"https://www.bible.com/bible/{_bible.TranslationCode}/{chapterUrl}.{_bible.BibleCode}");
+                i++;
+            }
         }
 
     }

@@ -1,20 +1,19 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Net;
 
-namespace BibleComScraper
+namespace BibleComScraper.Services
 {
     class HttpService
     {
 
-        private PageCache pageCache = new PageCache();
+        private PageCacheService pageCache = new PageCacheService();
 
         public string GetPage(string url, bool ignoreCache = false)
         {
 
             // see if the page exists in the page cache;
             var pageInCache = pageCache.IsPageCached(url);
-            Debug.WriteLine((pageInCache ? "page is already in cache" : "page is not in cache"));
+            Console.WriteLine((pageInCache ? "page is already in cache" : "page is not in cache"));
             if (pageInCache && !ignoreCache)
             {
                 return pageCache.GetPage(url);

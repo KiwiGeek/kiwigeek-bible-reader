@@ -1,13 +1,13 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Diagnostics;
 
-namespace BibleComScraper
+namespace BibleComScraper.Services
 {
-    class PageCache
+    class PageCacheService
     {
         private SqliteConnection pageCache = new SqliteConnection("Data Source=page_cache.db");
 
-        public PageCache()
+        public PageCacheService()
         {
 
             pageCache.Open();
@@ -61,7 +61,7 @@ namespace BibleComScraper
             }
         }
 
-        ~PageCache()
+        ~PageCacheService()
         {
             pageCache.Close();
         }
