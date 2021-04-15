@@ -55,7 +55,19 @@ namespace BibleComScraper.Services
                     return int.Parse(sqlCmd.ExecuteScalar().ToString() ?? "0") > 0;
                 }
             }
+        }
 
+        private bool IndexExists(string indexName)
+        {
+            using (SqliteConnection sqlConn = CreateOpenedSqliteConnection())
+            {
+                using (SqliteCommand sqlCmd = sqlConn.CreateCommand())
+                {
+                    sqlCmd.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name=$indexName";
+                    sqlCmd.Parameters.AddWithValue("$indexName", indexName);
+                    return int.Parse(sqlCmd.ExecuteScalar().ToString() ?? "0") > 0;
+                }
+            }
         }
 
         private bool IsMetadataInitialized()
@@ -80,6 +92,21 @@ namespace BibleComScraper.Services
         private bool IsVerseListInitialized()
         {
             return TableExists("verses");
+        }
+
+        private bool HasBookIndex()
+        {
+            return IndexExists("book_index");
+        }
+
+        private bool HasChapterIndex()
+        {
+            return IndexExists("chapter_index");
+        }
+
+        private bool HasVerseIndex()
+        {
+            return IndexExists("verse_index");
         }
 
         public bool InitializeDatabase()
@@ -154,6 +181,42 @@ namespace BibleComScraper.Services
                     using (SqliteCommand sqlCmd = sqlConn.CreateCommand())
                     {
                         sqlCmd.CommandText = "CREATE TABLE verses (book TEXT, chapter TEXT, verse_number NUMBER, section TEXT, prefix TEXT, verse TEXT, suffix TEXT, starts_paragraph NUMBER, ends_paragraph NUMBER)";
+                        sqlCmd.ExecuteNonQueryAsync();
+                    }
+                }
+            }
+
+            if (!HasBookIndex())
+            {
+                using (SqliteConnection sqlConn = CreateOpenedSqliteConnection())
+                {
+                    using (SqliteCommand sqlCmd = sqlConn.CreateCommand())
+                    {
+                        sqlCmd.CommandText = "CREATE UNIQUE INDEX \"book_index\" ON \"books\" (\"index\" ASC)";
+                        sqlCmd.ExecuteNonQueryAsync();
+                    }
+                }
+            }
+
+            if (!HasChapterIndex())
+            {
+                using (SqliteConnection sqlConn = CreateOpenedSqliteConnection())
+                {
+                    using (SqliteCommand sqlCmd = sqlConn.CreateCommand())
+                    {
+                        sqlCmd.CommandText = "CREATE UNIQUE INDEX \"chapter_index\" ON \"chapters\" (\"code\" ASC, \"index\" ASC)";
+                        sqlCmd.ExecuteNonQueryAsync();
+                    }
+                }
+            }
+
+            if (!HasVerseIndex())
+            {
+                using (SqliteConnection sqlConn = CreateOpenedSqliteConnection())
+                {
+                    using (SqliteCommand sqlCmd = sqlConn.CreateCommand())
+                    {
+                        sqlCmd.CommandText = "CREATE INDEX \"verse_index\" ON \"verses\" (\"book\" ASC, \"chapter\" ASC, \"verse_number\" ASC)";
                         sqlCmd.ExecuteNonQueryAsync();
                     }
                 }
