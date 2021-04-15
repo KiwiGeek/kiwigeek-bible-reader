@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Documents;
-using KiwiGeekBible.WPF.Classes;
 using Microsoft.Data.Sqlite;
 
 namespace KiwiGeekBible.WPF.Services
