@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Numerics;
 using System.Text.RegularExpressions;
+using System.Transactions;
 using BibleComScraper.Classes;
 using BibleComScraper.Enums;
 using BibleComScraper.Services;
@@ -214,7 +217,9 @@ namespace BibleComScraper
                 // if the match is a class="s", then it's a section header for the _next_ verse
                 // in the match is a class="p", then it's a verse text. May contain a span "qs" that's a verse footer (selah)
                 // if the match is a class="d", then it's a verse prefix for the _next_ verse.
-                // if the match is a class="q1, q2", then it's a verse text, where there's multiline-formatting. 
+                // if the match is a class="q1, q2", then it's a verse text, where there's multiline-formatting. If it's a section with one
+                //   these, we'll assume q1 starts a paragraph, and that paragraph ends a) with the next q1, or b) the next p. So when
+                //   a p or q1 starts, set the previous verse EndsParagraph to true, (unless we're on the first verse).
 
                 if (m.Value.Contains("class=\"s\""))
                 {
@@ -289,7 +294,6 @@ namespace BibleComScraper
                     if (!string.IsNullOrWhiteSpace(sectionHeader))
                     {
                         verseList[currentVerse].SectionTitle = sectionHeader;
-                        Debug.WriteLine($"{bookCode} {chapterCode}: {sectionHeader}");
                     }
 
 
@@ -378,11 +382,164 @@ namespace BibleComScraper
                     verseList[currentVerse].VersePrefix = versePrefix;
 
                 }
+                else if (m.Value.Contains("class=\"p\""))
+                {
+
+                    // let's handle the verse suffix's first
+                    if (m.Value.Contains("class=\"qs\""))
+                    {
+                        // it's a verse suffix
+                        Regex verseSuffixRegex = new Regex("verse v(?<verse>\\d{0,3})\".*tent\\\">(?<text>.*?)<");
+                        Match m2 = verseSuffixRegex.Match(m.Value);
+                        verseList[uint.Parse(m2.Groups["verse"].Value) - 1].VerseSuffix = m2.Groups["text"].Value;
+                    }
+                    else
+                    {
+
+                        if (m.Value.Contains("wj"))
+                        {
+                            Debug.WriteLine(m.Value);
+                        }
+
+                        // it's a regular verse paragraph.
+                        
+                        // let's start by scrubbing the easy stuff
+                        string paragraph = m.Value
+                            .Replace("&#8217;", "’")
+                            .Replace("&#8216;", "‘")
+                            .Replace("&#8220;", "“")
+                            .Replace("&#8221;", "”")
+                            .Replace("&#8212;", "—")
+                            .Replace("&#8211;", "–")
+                            .Replace("&#274;", "E")                     /// fix for bible.org making Enosh into Ē'nosh
+                            .Replace("&#180;", " ")                     /// fix for bible.org making Enosh into Ē'nosh
+                            .Replace("&#233;", "é")  
+                                          ;
+
+                        // strip out div tags
+                        paragraph = Regex.Replace(paragraph, "<\\/div>", "");
+                        paragraph = Regex.Replace(paragraph, "<div class=\\\"p\\\">", "");
+
+                        // strip label from notes span from string
+                        paragraph = paragraph.Replace("<span class=\"label\">#</span>", "");
 
 
+                        // strip any body spans
+                        paragraph = Regex.Replace(paragraph, "<span class=\\\" {0,1}body\\\">.*?<\\/span>", "");
 
+
+                        // strip out notes spans
+                        paragraph = Regex.Replace(paragraph, "<span class=\"note.*?<\\/span>", "");
+
+                        // strip out the verse labels
+                        paragraph = Regex.Replace(paragraph, "<span class=\"label\">\\d+<\\/span>", "");
+
+                        // strip out any content tags
+                        while (Regex.IsMatch(paragraph, "<span class=\"content\">.*?<\\/span>"))
+                        {
+                            Match spanM = Regex.Match(paragraph, "<span class=\\\"content\\\">(?<content>.*?)<\\/span>");
+                            paragraph = paragraph.Replace(spanM.Value, spanM.Groups["content"].Value);
+                        }
+
+                        // fix small caps.  Right now they'll look like this: 
+                        // <span class="sc">Lord</i>
+                        while (Regex.IsMatch(paragraph, "class=\"sc\""))
+                        {
+                            Match spanM = Regex.Match(paragraph, "<span class=\\\"sc\\\">(?<text>.*?)<\\/span>");
+                            string innerText = spanM.Groups["text"].Value
+                                .Replace("a", "ᴀ")
+                                .Replace("b", "ʙ")
+                                .Replace("c", "ᴄ")
+                                .Replace("d", "ᴅ")
+                                .Replace("e", "ᴇ")
+                                .Replace("f", "ꜰ")
+                                .Replace("g", "ɢ")
+                                .Replace("h", "ʜ")
+                                .Replace("i", "ɪ")
+                                .Replace("j", "ᴊ")
+                                .Replace("k", "ᴋ")
+                                .Replace("l", "ʟ")
+                                .Replace("m", "ᴍ")
+                                .Replace("n", "ɴ")
+                                .Replace("o", "ᴏ")
+                                .Replace("p", "ᴘ")
+                                .Replace("q", "ǫ")
+                                .Replace("r", "ʀ")
+                                .Replace("s", "s")
+                                .Replace("t", "ᴛ")
+                                .Replace("u", "ᴜ")
+                                .Replace("v", "ᴠ")
+                                .Replace("w", "ᴡ")
+                                .Replace("x", "x")
+                                .Replace("y", "ʏ")
+                                .Replace("z", "ᴢ");
+                            paragraph = paragraph.Replace(spanM.Value, innerText);
+                        }
+
+                        // convert italics tags
+                        while (Regex.IsMatch(paragraph,
+                            "(?<pretext>.*?)<span class=\\\"it\\\">(?<italicsText>.*?)<\\/span>(?<posttext>.*)"))
+                        {
+                            Regex ItalicsRegex =
+                                new Regex(
+                                    "(?<pretext>.*?)<span class=\"it\">(?<italicsText>.*?)<\\/span>(?<posttext>.*)");
+                            Match m2 = ItalicsRegex.Match(paragraph);
+                            paragraph = m2.Groups["pretext"] + "<i>" + m2.Groups["italicsText"] + "</i>" +
+                                        m2.Groups["posttext"];
+                        }
+
+                        // convert words of Jesus to red. This needs to happen after italics.
+                        while (Regex.IsMatch(paragraph, "<span class=\"wj\">.*?<\\/span>"))
+                        {
+                            Match spanM = Regex.Match(paragraph, "<span class=\\\"wj\\\">(?<content>.*?)<\\/span>");
+                            string innerText = spanM.Groups["content"].Value;
+                            paragraph = paragraph.Replace(spanM.Value, $"<font color=red>{innerText}</font>");
+                        }
+
+                        // strip out any double spaces
+                        while (paragraph.Contains("  "))
+                        {
+                            paragraph = paragraph.Replace("  ", " ");
+                        }
+
+                        // strip out any doubled-up italics tags
+                        paragraph = paragraph.Replace("</i> <i>", " ");
+
+                        // strip out any doubled-up red-letter tags
+                        paragraph = paragraph.Replace("</font><font color=red>", "")
+                            .Replace("</font> <font color=red>", " ");
+
+
+                        // now, for each span that is left, extract the verse, and the text, and slap it into the array.
+                        bool firstVerseInParagraph = true;
+                        Regex versesRegex = new Regex("<span class=\"verse v(?<verseNumber>\\d{1,3})\".*?>(?<text>.*?)<\\/span>");
+                        MatchCollection verseMatches = versesRegex.Matches(paragraph);
+                        foreach (Match v in verseMatches)
+                        {
+                            verseList[uint.Parse(v.Groups["verseNumber"].Value) - 1].Book = bookCode;
+                            verseList[uint.Parse(v.Groups["verseNumber"].Value) - 1].ChapterName = chapterCode;
+                            verseList[uint.Parse(v.Groups["verseNumber"].Value) - 1].VerseNumber =
+                                uint.Parse(v.Groups["verseNumber"].Value);
+                            verseList[uint.Parse(v.Groups["verseNumber"].Value) - 1].VerseText = v.Groups["text"].Value;
+                            if (firstVerseInParagraph)
+                            {
+                                verseList[uint.Parse(v.Groups["verseNumber"].Value) - 1].StartsParagraph = true;
+                                if (uint.Parse(v.Groups["verseNumber"].Value) > 1)
+                                {
+                                    verseList[uint.Parse(v.Groups["verseNumber"].Value) - 2].EndsParagraph = true;
+                                }
+                            }
+                            firstVerseInParagraph = false;
+                        }
+                    }
+                }
+                
             }
 
+            foreach (Verse v in verseList.Where(f => f.VerseNumber != 0))
+            {
+                _bible.AddVerse(v);
+            }
 
         }
 

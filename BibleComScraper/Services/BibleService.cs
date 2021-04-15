@@ -77,6 +77,11 @@ namespace BibleComScraper.Services
             return TableExists("chapters");
         }
 
+        private bool IsVerseListInitialized()
+        {
+            return TableExists("verses");
+        }
+
         public bool InitializeDatabase()
         {
             if (!IsMetadataInitialized())
@@ -137,6 +142,18 @@ namespace BibleComScraper.Services
                     using (SqliteCommand sqlCmd = sqlConn.CreateCommand())
                     {
                         sqlCmd.CommandText = "CREATE TABLE chapters (code TEXT, [index] NUMBER, name TEXT)";
+                        sqlCmd.ExecuteNonQueryAsync();
+                    }
+                }
+            }
+
+            if (!IsVerseListInitialized())
+            {
+                using (SqliteConnection sqlConn = CreateOpenedSqliteConnection())
+                {
+                    using (SqliteCommand sqlCmd = sqlConn.CreateCommand())
+                    {
+                        sqlCmd.CommandText = "CREATE TABLE verses (book TEXT, chapter TEXT, verse_number NUMBER, section TEXT, prefix TEXT, verse TEXT, suffix TEXT, starts_paragraph NUMBER, ends_paragraph NUMBER)";
                         sqlCmd.ExecuteNonQueryAsync();
                     }
                 }
@@ -245,6 +262,27 @@ namespace BibleComScraper.Services
                     sqlCmd.Parameters.AddWithValue("$index", chapter.Index);
                     sqlCmd.Parameters.AddWithValue("$name", chapter.Name);
                     sqlCmd.Parameters.AddWithValue("$code", chapter.Code);
+                    sqlCmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public void AddVerse(Verse verse)
+        {
+            using (SqliteConnection sqlConn = CreateOpenedSqliteConnection())
+            {
+                using (SqliteCommand sqlCmd = sqlConn.CreateCommand())
+                {
+                    sqlCmd.CommandText = "INSERT INTO verses (book, chapter, verse_number, section, prefix, verse, suffix, starts_paragraph, ends_paragraph) values ($book, $chapter, $verse_number, $section, $prefix, $verse, $suffix, $starts_paragraph, $ends_paragraph)";
+                    sqlCmd.Parameters.AddWithValue("$book", verse.Book);
+                    sqlCmd.Parameters.AddWithValue("$chapter", verse.ChapterName);
+                    sqlCmd.Parameters.AddWithValue("$verse_number", verse.VerseNumber);
+                    sqlCmd.Parameters.AddWithValue("$section", verse.SectionTitle ?? string.Empty);
+                    sqlCmd.Parameters.AddWithValue("$prefix", verse.VersePrefix ?? string.Empty);
+                    sqlCmd.Parameters.AddWithValue("$verse", verse.VerseText);
+                    sqlCmd.Parameters.AddWithValue("$suffix", verse.VerseSuffix ?? string.Empty);
+                    sqlCmd.Parameters.AddWithValue("$starts_paragraph", verse.StartsParagraph ? 1 : 0);
+                    sqlCmd.Parameters.AddWithValue("$ends_paragraph", verse.EndsParagraph ? 1 : 0);
                     sqlCmd.ExecuteNonQuery();
                 }
             }
