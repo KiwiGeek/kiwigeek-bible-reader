@@ -228,6 +228,10 @@ namespace KiwiGeekBible.WPF
 
         private void RenderChapter(string book, uint chapter)
         {
+
+            // remove "<br />" from the start of any verses if we're in VERSES_AS_PARAGRAPHS mode, and not prose mode.
+            // if we're in prose mode, we need to insert the verse label _after_ the line-break.
+
             List<Verse> chapterContents = nkjv.GetChapter(book, chapter);
 
             string chapterHTML = string.Empty;
