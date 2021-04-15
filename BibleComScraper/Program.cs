@@ -407,7 +407,7 @@ namespace BibleComScraper
                             .Replace("&#8212;", "—")
                             .Replace("&#8211;", "–")
                             .Replace("&#274;", "E")                     /// fix for bible.org making Enosh into Ē'nosh
-                            .Replace("&#180;", " ")                     /// fix for bible.org making Enosh into Ē'nosh
+                            .Replace("&#180;", "")                      /// fix for bible.org making Enosh into Ē'nosh
                             .Replace("&#233;", "é")
                                           ;
 
