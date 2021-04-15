@@ -13,7 +13,7 @@
             <telerik:RadTabControl.Items>
                 <telerik:RadTabItem Header="Bible">
                     <telerik:RadTabItem.Content>
-                        <telerik:RadRichTextBox x:Name="BibleViewer" IsReadOnly="True" />
+                        <telerik:RadRichTextBox x:Name="BibleViewer" IsReadOnly="True" IsSpellCheckingEnabled="False"/>
                     </telerik:RadTabItem.Content>
                 </telerik:RadTabItem>
             </telerik:RadTabControl.Items>

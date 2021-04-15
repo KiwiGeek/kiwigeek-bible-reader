@@ -20,12 +20,14 @@ namespace KiwiGeekBible.WPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        private NKJVTranslation nkjv = new NKJVTranslation();
+        private IBibleTranslation nkjv;
         private const bool VERSES_AS_PARAGRAPHS = true;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            nkjv = new BibleTranslation("NKJV");
 
             Telerik.Windows.Controls.RichTextBoxUI.ContextMenu contextMenu = (Telerik.Windows.Controls.RichTextBoxUI.ContextMenu)this.radRichTextBox.ContextMenu;
             contextMenu.Showing += richTextBox_OnContextMenuShowing;
@@ -159,7 +161,7 @@ namespace KiwiGeekBible.WPF
 
                 // let's start by trying to parse a "v[verse]" reference
 
-                Regex v1Regex = new Regex("(\\b(?<book>[\\w']+)\\b\\s(?<chapter>\\d)+:(?<verse>\\d*)[\\d \\-:]{0,300})");
+                Regex v1Regex = new Regex("(\\b(?<book>[\\w']+)\\b\\s(?<chapter>\\d+):(?<verse>\\d*)[\\d \\-:]{0,300})");
                 Regex v2Regex = new Regex("(, ?(?<chapter>\\d+):)(?<verse>\\d+)[\\-]*\\d*[\\d \\-:]{0,300}\\d");
                 Regex v3Regex = new Regex("(, ?(?<verse>\\d+))[\\-]*\\d*");
                 Regex v4Regex = new Regex("(v(?<verse>\\d{1,3}))");
@@ -170,7 +172,7 @@ namespace KiwiGeekBible.WPF
                     result.Book = nkjv.GetBookCode(m.Groups["book"].Value).ToLower();
                     result.Chapter = uint.Parse(m.Groups["chapter"].Value);
                     result.Verse = uint.Parse(m.Groups["verse"].Value);
-                    
+
                 }
                 else if (v2Regex.IsMatch(input))
                 {
@@ -245,12 +247,26 @@ namespace KiwiGeekBible.WPF
 
                 if (VERSES_AS_PARAGRAPHS)
                 {
+                    /* if (verse.VerseText.StartsWith("<br />"))
+                     {
+                         verse.VerseText = verse.VerseText.Substring(6,verse.VerseText.Length-6);
+                     }*/
+
                     if (verse.StartsParagraph)
                     {
                         chapterHTML += "<p>";
                     }
 
-                    chapterHTML += $"<b>{verse.VerseNumber}</b> {verse.VerseText}&nbsp;&nbsp;";
+                    if (verse.VerseText.StartsWith("<br />"))
+                    {
+                        verse.VerseText = verse.VerseText.Substring(6, verse.VerseText.Length - 6);
+                        chapterHTML += $"<br /><b>{verse.VerseNumber}</b> {verse.VerseText}&nbsp;&nbsp;";
+                    }
+                    else
+                    {
+                        chapterHTML += $"<b>{verse.VerseNumber}</b> {verse.VerseText}&nbsp;&nbsp;";
+                    }
+
 
                     if (verse.EndsParagraph)
                     {

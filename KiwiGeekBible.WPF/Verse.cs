@@ -9,11 +9,11 @@ namespace KiwiGeekBible.WPF
 {
     public class Verse
     {
-        public uint VerseNumber { get; init; }
-        public string SectionTitle { get; init; }
-        public string VersePrefix { get; init; }
-        public string VerseText { get; init; }
-        public string VerseSuffix { get; init; }
+        public uint VerseNumber { get; set; }
+        public string SectionTitle { get; set; }
+        public string VersePrefix { get; set; }
+        public string VerseText { get; set; }
+        public string VerseSuffix { get; set; }
         public bool StartsParagraph { get; set; }
         public bool EndsParagraph { get; set; }
 
@@ -37,6 +37,11 @@ namespace KiwiGeekBible.WPF
             SectionTitle = sectionTitle;
             VerseNumber = verseNumber;
             VerseText = text;
+        }
+
+        public Verse()
+        {
+
         }
     }
 }
