@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -260,11 +261,11 @@ namespace KiwiGeekBible.WPF
                     if (verse.VerseText.StartsWith("<br />"))
                     {
                         verse.VerseText = verse.VerseText.Substring(6, verse.VerseText.Length - 6);
-                        chapterHTML += $"<br /><b>{verse.VerseNumber}</b> {verse.VerseText}&nbsp;&nbsp;";
+                        chapterHTML += $"<br /><b>{verse.VerseNumber}</b>&nbsp;{verse.VerseText}";
                     }
                     else
                     {
-                        chapterHTML += $"<b>{verse.VerseNumber}</b> {verse.VerseText}&nbsp;&nbsp;";
+                        chapterHTML += $"<b>{verse.VerseNumber}</b>&nbsp;{verse.VerseText}";
                     }
 
 
@@ -275,7 +276,7 @@ namespace KiwiGeekBible.WPF
                 }
                 else
                 {
-                    chapterHTML += $"<p><b>{verse.VerseNumber}</b> {verse.VerseText}&nbsp;&nbsp;</p>";
+                    chapterHTML += $"<p><b>{verse.VerseNumber}</b>&nbsp;{verse.VerseText}&nbsp;&nbsp;</p>";
                 }
 
 
