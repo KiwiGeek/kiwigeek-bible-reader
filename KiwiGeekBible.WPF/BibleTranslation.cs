@@ -112,6 +112,11 @@ namespace KiwiGeekBible.WPF
             return !string.IsNullOrWhiteSpace(GetBookCode(input));
         }
 
+        public string GetBookName(string book)
+        {
+            return !IsValidBookName(book) ? string.Empty : _bible.Books.First(f => f.CanonicalCode.ToUpper() == book.ToUpper()).Name;
+        }
+
         public List<Verse> GetChapter(string book, uint chapter)
         {
             return _bible.Books.First(b => b.CanonicalCode.ToUpper() == book.ToUpper()).Chapters
@@ -148,5 +153,7 @@ namespace KiwiGeekBible.WPF
         {
             return (verse <= GetBookChapterVerseCount(book, chapter));
         }
+
+       
     }
 }
