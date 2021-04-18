@@ -436,6 +436,13 @@ namespace BibleComScraper
                             paragraph = paragraph.Replace(spanM.Value, spanM.Groups["content"].Value);
                         }
 
+                        // strip out any bold spans 
+                        while (Regex.IsMatch(paragraph, "<span class=\"bd\">.*?<\\/span>"))
+                        {
+                            Match spanM = Regex.Match(paragraph, "<span class=\\\"bd\\\">(?<content>.*?)<\\/span>");
+                            paragraph = paragraph.Replace(spanM.Value, spanM.Groups["content"].Value);
+                        }
+
                         // fix small caps.  Right now they'll look like this: 
                         // <span class="sc">Lord</i>
                         while (Regex.IsMatch(paragraph, "class=\"sc\""))
