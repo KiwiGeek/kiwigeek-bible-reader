@@ -237,13 +237,19 @@ namespace KiwiGeekBible.WPF
 
             List<Verse> chapterContents = nkjv.GetChapter(book, chapter);
 
+            string bookName = nkjv.GetBookName(book);
+
             string chapterHTML = string.Empty;
+
+            // insert the book and chapter title
+            chapterHTML += $"<h1 style=\"text-align:center\">{bookName} {chapter}</h1>";
+
             foreach (Verse verse in chapterContents)
             {
 
                 if (!string.IsNullOrWhiteSpace(verse.SectionTitle))
                 {
-                    chapterHTML += $"<h2>{verse.SectionTitle}</h2>";
+                    chapterHTML += $"<h3>{verse.SectionTitle}</h3>";
                 }
 
                 if (VERSES_AS_PARAGRAPHS)

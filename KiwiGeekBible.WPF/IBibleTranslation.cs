@@ -20,5 +20,6 @@ namespace KiwiGeekBible.WPF
         uint GetBookChapterVerseCount(string book, uint chapter);
         bool IsValidBookChapterVerseNumber(string book, uint chapter, uint verse);
 
+        string GetBookName(string book);
     }
 }
