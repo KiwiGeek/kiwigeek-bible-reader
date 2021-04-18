@@ -95,7 +95,7 @@ namespace KiwiGeekBible.WPF
 
 
                         DocumentTextSearch search = new DocumentTextSearch(radRichTextBox.Document);
-                        foreach (TextRange textRange in search.FindAll("(\\b[\\w']+\\b\\s\\d+:\\d*[\\d \\-:]{0,300}\\d)|(, ?\\d+:\\d+)[\\-]*\\d*[\\d \\-:]{0,300}\\d|(, ?\\d+)[\\-]*\\d*|(v\\d{1,3})"))
+                        foreach (TextRange textRange in search.FindAll("(\\b((1|2|3|I|II|III|i|ii|iii) )?[\\w']+\\b\\s\\d+:\\d*[\\d \\-:]{0,300}\\d)|(, ?\\d+:\\d+)[\\-]*\\d*[\\d \\-:]{0,300}\\d|(, ?\\d+)[\\-]*\\d*|(v\\d{1,3})"))
                         {
 
                             // textRange will represent a string in one of the following formats:
@@ -162,7 +162,7 @@ namespace KiwiGeekBible.WPF
 
                 // let's start by trying to parse a "v[verse]" reference
 
-                Regex v1Regex = new Regex("(\\b(?<book>[\\w']+)\\b\\s(?<chapter>\\d+):(?<verse>\\d*)[\\d \\-:]{0,300})");
+                Regex v1Regex = new Regex("(\\b(?<book>((1|2|3|I|II|III|i|ii|iii) )?[\\w']+)\\b\\s(?<chapter>\\d+):(?<verse>\\d*)[\\d \\-:]{0,300})");
                 Regex v2Regex = new Regex("(, ?(?<chapter>\\d+):)(?<verse>\\d+)[\\-]*\\d*[\\d \\-:]{0,300}\\d");
                 Regex v3Regex = new Regex("(, ?(?<verse>\\d+))[\\-]*\\d*");
                 Regex v4Regex = new Regex("(v(?<verse>\\d{1,3}))");
