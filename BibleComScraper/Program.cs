@@ -673,7 +673,7 @@ namespace BibleComScraper
 
                             verseList[uint.Parse(v.Groups["verseNumber"].Value) - 1].VerseText =
                                 verseList[uint.Parse(v.Groups["verseNumber"].Value) - 1].VerseText +
-                                (multilineType == "q1" ? string.Empty : "<br />") +
+                                (multilineType == "q1" && verseList[uint.Parse(v.Groups["verseNumber"].Value) - 1].VerseText == string.Empty ? string.Empty : "<br />") +
                                 v.Groups["text"].Value;
 
                             if (firstVerseInParagraph)
