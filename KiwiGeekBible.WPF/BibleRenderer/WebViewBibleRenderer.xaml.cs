@@ -77,7 +77,12 @@ namespace KiwiGeekBible.WPF.BibleRenderer
                     chapterHTML += "</p>";
                 }
 #else
-                chapterHTML += $"<p><b>{verse.VerseNumber}</b>&nbsp;{verse.VerseText}&nbsp;&nbsp;</p>";
+                string scrubbedVerse = verse.VerseText;
+                if (scrubbedVerse.StartsWith("<br />"))
+                {
+                    scrubbedVerse = scrubbedVerse.Substring(6);
+                }
+                chapterHTML += $"<p><b>{verse.VerseNumber}</b>&nbsp;{scrubbedVerse}&nbsp;&nbsp;</p>";
 #endif
 
 
