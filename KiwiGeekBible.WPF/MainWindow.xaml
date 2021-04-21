@@ -23,18 +23,9 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <telerik:RadTabControl x:Name="TabReaderControl"  Grid.Column="0" CloseTabsOnMouseMiddleButtonDown="False" Grid.RowSpan="3">
-            <telerik:RadTabControl.Items>
-                <telerik:RadTabItem Header="Bible">
-                    <telerik:RadTabItem.Content>
-                        <telerik:RadRichTextBox x:Name="BibleViewer" IsReadOnly="True" IsSpellCheckingEnabled="False"/>
-                    </telerik:RadTabItem.Content>
-                </telerik:RadTabItem>
-            </telerik:RadTabControl.Items>
-        </telerik:RadTabControl>
+        <ContentControl x:Name="RendererPlaceHolder" Grid.Row="1" Grid.Column="0"/>
 
-        <GridSplitter Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" Width="3" VerticalAlignment="Stretch" ResizeBehavior="PreviousAndNext" Background="Gainsboro" />
-
+        <GridSplitter Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Width="3" VerticalAlignment="Stretch" ResizeBehavior="PreviousAndNext" Background="Gainsboro" />
 
         <telerik:DocumentRuler Grid.Row="1" Grid.Column="2">
             <telerik:RadRichTextBox x:Name="radRichTextBox" IsSelectionMiniToolBarEnabled="True" IsSpellCheckingEnabled="True" IsContextMenuEnabled="True" LayoutMode="Paged" 
@@ -927,7 +918,7 @@
                 </telerik:RadRibbonGroup>
             </telerik:RadRibbonTab>
         </telerik:RadRichTextBoxRibbonUI>
-        <telerik:RadRichTextBoxStatusBar Grid.ColumnSpan="3" Grid.Column="0" AssociatedRichTextBox="{Binding ElementName=radRichTextBox}" Grid.Row="2"/>
+        <telerik:RadRichTextBoxStatusBar  Grid.Column="2" AssociatedRichTextBox="{Binding ElementName=radRichTextBox}" Grid.Row="2"/>
     </Grid>
 
 </telerik:RadWindow>
