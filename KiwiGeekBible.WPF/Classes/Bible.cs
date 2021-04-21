@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KiwiGeekBible.WPF
 {
-    class Bible
+    public class Bible
     {
         public List<Book> Books { get; set; } = new List<Book>();
     }

@@ -7,7 +7,7 @@ using Telerik.Windows.Documents.Spreadsheet.Expressions.Functions;
 
 namespace KiwiGeekBible.WPF
 {
-    class BibleTranslation : IBibleTranslation
+    public class BibleTranslation : IBibleTranslation
     {
 
         public string TranslationCode { get; init; }
@@ -117,7 +117,7 @@ namespace KiwiGeekBible.WPF
             return !IsValidBookName(book) ? string.Empty : _bible.Books.First(f => f.CanonicalCode.ToUpper() == book.ToUpper()).Name;
         }
 
-        public List<Verse> GetChapter(string book, uint chapter)
+        private List<Verse> GetChapter(string book, uint chapter)
         {
             return _bible.Books.First(b => b.CanonicalCode.ToUpper() == book.ToUpper()).Chapters
                 .First(c => c.ChapterNumber == chapter).Verses;
@@ -154,6 +154,11 @@ namespace KiwiGeekBible.WPF
             return (verse <= GetBookChapterVerseCount(book, chapter));
         }
 
-       
+        (string, List<Verse>) IBibleTranslation.GetChapter(string book, uint chapter)
+        {
+            string bookName = GetBookName(book);
+            List<Verse> verses = GetChapter(book, chapter);
+            return (bookName, verses);
+        }
     }
 }

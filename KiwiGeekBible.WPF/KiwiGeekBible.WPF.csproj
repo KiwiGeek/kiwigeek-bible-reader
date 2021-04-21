@@ -6,9 +6,13 @@
     <RootNamespace>KiwiGeekBible.WPF</RootNamespace>
     <EnableDefaultItems>False</EnableDefaultItems>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;VERSES_AS_PROSE</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.5" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.774.44" />
     <PackageReference Include="Telerik.UI.for.Wpf.NetCore.Xaml" Version="2021.1.325" />
   </ItemGroup>
   
@@ -17,6 +21,9 @@
     <Generator>MSBuild:Compile</Generator>
     <SubType>Designer</SubType>
   </ApplicationDefinition>
+  <Page Include="BibleRenderer\WebViewBibleRenderer.xaml">
+    <Generator>MSBuild:Compile</Generator>
+  </Page>
   <Page Include="MainWindow.xaml">
     <Generator>MSBuild:Compile</Generator>
     <SubType>Designer</SubType>
@@ -25,18 +32,21 @@
     <DependentUpon>App.xaml</DependentUpon>
     <SubType>Code</SubType>
   </Compile>
-  <Compile Include="Bible.cs" />
-  <Compile Include="BibleTranslation.cs" />
-  <Compile Include="Book.cs" />
-  <Compile Include="Chapter.cs" />
-  <Compile Include="IBibleTranslation.cs" />
+  <Compile Include="Classes\Bible.cs" />
+  <Compile Include="BibleRenderer\IBibleRenderer.cs" />
+  <Compile Include="BibleRenderer\WebViewBibleRenderer.xaml.cs" />
+  <Compile Include="BibleTranslations\BibleTranslation.cs" />
+  <Compile Include="Classes\Book.cs" />
+  <Compile Include="Classes\Chapter.cs" />
+  <Compile Include="Classes\BibleReference.cs" />
+  <Compile Include="BibleTranslations\IBibleTranslation.cs" />
   <Compile Include="MainWindow.xaml.cs">
     <DependentUpon>MainWindow.xaml</DependentUpon>
     <SubType>Code</SubType>
   </Compile>
-  <Compile Include="ParsedReference.cs" />
+  <Compile Include="Classes\ParsedReference.cs" />
   <Compile Include="Services\BibleService.cs" />
-  <Compile Include="Verse.cs" />
+  <Compile Include="Classes\Verse.cs" />
 </ItemGroup>
   
   <ItemGroup>

@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using KiwiGeekBible.WPF.BibleRenderer;
+using KiwiGeekBible.WPF.Classes;
 using Telerik.Windows.Controls;
 using Telerik.Windows.Controls.RichTextBoxUI.Menus;
 using Telerik.Windows.Documents;
@@ -22,7 +24,6 @@ namespace KiwiGeekBible.WPF
     public partial class MainWindow : RadWindow
     {
         private IBibleTranslation nkjv;
-        private const bool VERSES_AS_PARAGRAPHS = true;
 
         public MainWindow()
         {
@@ -32,8 +33,10 @@ namespace KiwiGeekBible.WPF
 
             Telerik.Windows.Controls.RichTextBoxUI.ContextMenu contextMenu = (Telerik.Windows.Controls.RichTextBoxUI.ContextMenu)this.radRichTextBox.ContextMenu;
             contextMenu.Showing += richTextBox_OnContextMenuShowing;
+            RendererPlaceHolder.Content = new WebViewBibleRenderer(nkjv);
 
         }
+
 
         private void richTextBox_OnContextMenuShowing(object? sender, ContextMenuEventArgs e)
         {
@@ -143,7 +146,6 @@ namespace KiwiGeekBible.WPF
                 }
 
             }
-
             radRichTextBox.UpdateEditorLayout(false);
 
         }
@@ -159,7 +161,6 @@ namespace KiwiGeekBible.WPF
 
             try
             {
-
                 // let's start by trying to parse a "v[verse]" reference
 
                 Regex v1Regex = new Regex("(\\b(?<book>((1|2|3|I|II|III|i|ii|iii) )?[\\w']+)\\b\\s(?<chapter>\\d+):(?<verse>\\d*)[\\d \\-:]{0,300})");
@@ -209,9 +210,6 @@ namespace KiwiGeekBible.WPF
                 Debug.WriteLine($"failed to parse {input}");
             }
 
-
-
-
             return result;
         }
 
@@ -222,79 +220,16 @@ namespace KiwiGeekBible.WPF
                 // parse book, chapter and verse from link
                 Regex urlRegex = new Regex("book=(?<book>.*)&chap=(?<chap>\\d*)&verse=(?<verse>\\d*)");
                 Match m = urlRegex.Match(e.URL);
-                RenderChapter(m.Groups["book"].Value, uint.Parse(m.Groups["chap"].Value));
+                ((IBibleRenderer) RendererPlaceHolder.Content).NavigateToScripture(
+                    new BibleReference()
+                    {
+                        Book = m.Groups["book"].Value,
+                        Chapter = m.Groups["chap"].Value,
+                        Verse = uint.Parse(m.Groups["verse"].Value)
+                    });
                 e.Handled = true;
             }
-
-
         }
-
-        private void RenderChapter(string book, uint chapter)
-        {
-
-            // remove "<br />" from the start of any verses if we're in VERSES_AS_PARAGRAPHS mode, and not prose mode.
-            // if we're in prose mode, we need to insert the verse label _after_ the line-break.
-
-            List<Verse> chapterContents = nkjv.GetChapter(book, chapter);
-
-            string bookName = nkjv.GetBookName(book);
-
-            string chapterHTML = string.Empty;
-
-            // insert the book and chapter title
-            chapterHTML += $"<h1 style=\"text-align:center\">{bookName} {chapter}</h1>";
-
-            foreach (Verse verse in chapterContents)
-            {
-
-                if (!string.IsNullOrWhiteSpace(verse.SectionTitle))
-                {
-                    chapterHTML += $"<h3>{verse.SectionTitle}</h3>";
-                }
-
-                if (VERSES_AS_PARAGRAPHS)
-                {
-                    /* if (verse.VerseText.StartsWith("<br />"))
-                     {
-                         verse.VerseText = verse.VerseText.Substring(6,verse.VerseText.Length-6);
-                     }*/
-
-                    if (verse.StartsParagraph)
-                    {
-                        chapterHTML += "<p>";
-                    }
-
-                    if (verse.VerseText.StartsWith("<br />"))
-                    {
-                        verse.VerseText = verse.VerseText.Substring(6, verse.VerseText.Length - 6);
-                        chapterHTML += $"<br /><b>{verse.VerseNumber}</b>&nbsp;{verse.VerseText}";
-                    }
-                    else
-                    {
-                        chapterHTML += $"<b>{verse.VerseNumber}</b>&nbsp;{verse.VerseText}";
-                    }
-
-
-                    if (verse.EndsParagraph)
-                    {
-                        chapterHTML += "</p>";
-                    }
-                }
-                else
-                {
-                    chapterHTML += $"<p><b>{verse.VerseNumber}</b>&nbsp;{verse.VerseText}&nbsp;&nbsp;</p>";
-                }
-
-
-            }
-
-            HtmlFormatProvider provider = new HtmlFormatProvider();
-            RadDocument document = provider.Import(chapterHTML);
-
-            BibleViewer.Document = document;
-
-        }
-
 
     }
 }
