@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Windows;
+using Telerik.Windows.Controls;
 
 namespace KiwiGeekBible.WPF
 {
@@ -12,9 +13,12 @@ namespace KiwiGeekBible.WPF
     /// </summary>
     public partial class App : Application
     {
-        public App()
+
+        protected override void OnStartup(StartupEventArgs e)
         {
-           this.InitializeComponent();
+            StyleManager.ApplicationTheme = new Office2019Theme();
+            MainWindow window = new MainWindow();
+            window.Show();
         }
     }
 }

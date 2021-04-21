@@ -19,7 +19,7 @@ namespace KiwiGeekBible.WPF
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : RadWindow
     {
         private IBibleTranslation nkjv;
         private const bool VERSES_AS_PARAGRAPHS = true;
