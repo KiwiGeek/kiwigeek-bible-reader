@@ -97,7 +97,13 @@ namespace KiwiGeekBible.WPF
 
 
                         DocumentTextSearch search = new DocumentTextSearch(radRichTextBox.Document);
-                        foreach (TextRange textRange in search.FindAll("(\\b((1|2|3|I|II|III|i|ii|iii) )?[\\w']+\\b\\s\\d+:\\d*[\\d \\-:]{0,300}\\d)|(, ?\\d+:\\d+)[\\-]*\\d*[\\d \\-:]{0,300}\\d|(, ?\\d+)[\\-]*\\d*|(v\\d{1,3})"))
+                        radRichTextBox.Document.CaretPosition.MoveToFirstPositionInParagraph();
+                        DocumentPosition startDocPos = radRichTextBox.Document.CaretPosition;
+                        radRichTextBox.Document.CaretPosition.MoveToLastPositionInParagraph();
+                        DocumentPosition endDocPos = radRichTextBox.Document.CaretPosition;
+                        radRichTextBox.Document.CaretPosition.MoveToFirstPositionInParagraph();
+
+                        foreach (TextRange textRange in search.FindAll("(\\b((1|2|3|I|II|III|i|ii|iii) )?[\\w']+\\b\\s\\d+:\\d*[\\d \\-:]{0,300}\\d)|(, ?\\d+:\\d+)[\\-]*\\d*[\\d \\-:]{0,300}\\d|(, ?\\d+)[\\-]*\\d*|(v\\d{1,3})",startDocPos, originalCaretPosition))
                         {
 
                             // textRange will represent a string in one of the following formats:
