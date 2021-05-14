@@ -69,7 +69,6 @@ namespace KiwiGeekBible.WPF
 
         private void radRichTextBox_KeyUp(object sender, KeyEventArgs e)
         {
-
             if (e.Key == Key.Space || e.Key == Key.Enter)
             {
 
@@ -142,6 +141,7 @@ namespace KiwiGeekBible.WPF
                     }
 
                     radRichTextBox.Document.CaretPosition.MoveToPosition(originalCaretPosition);
+                    radRichTextBox.Document.Selection.Ranges.Clear();
                     radRichTextBox.ActiveEditorPresenter.ScrollToVerticalOffset(originalOffset - originalY + this.radRichTextBox.Document.CaretPosition.Location.Y);
                 }
 
