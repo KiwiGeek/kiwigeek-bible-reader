@@ -23,8 +23,6 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <ContentControl x:Name="RendererPlaceHolder" Grid.Row="1" Grid.Column="0"/>
-
         <GridSplitter Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Width="3" VerticalAlignment="Stretch" ResizeBehavior="PreviousAndNext" Background="Gainsboro" />
 
         <telerik:DocumentRuler Grid.Row="1" Grid.Column="2">
@@ -33,7 +31,7 @@
         </telerik:DocumentRuler>
         <telerik:RadRichTextBoxRibbonUI Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0" ApplicationButtonContent="File" BackstageClippingElement="{Binding ElementName=radRichTextBoxParent}" CollapseThresholdSize="50,50" DataContext="{Binding Commands, ElementName=radRichTextBox}" ApplicationName="Scripture Scribe" QuickAccessToolBarPosition="NotHosted" TitleBarVisibility="Collapsed">
             <telerik:RadRichTextBoxRibbonUI.Backstage>
-                <telerik:RadRibbonBackstage AutomationProperties.Name="Backstage">
+                <telerik:RadRibbonBackstage AutomationProperties.Name="Backstage" Loaded="FrameworkElement_OnLoaded" Unloaded="FrameworkElement_OnUnloaded">
                     <telerik:RadRibbonBackstageItem Header="New" Icon="{telerik:IconResource IconSources={StaticResource IconSources}, IconRelativePath=16/new.png}" IsSelectable="false" AutomationProperties.Name="New Document" telerik:RadRichTextBoxRibbonUI.RichTextCommand="{Binding NewDocumentCommand}"/>
                     <telerik:RadRibbonBackstageItem Header="Open" Icon="{telerik:IconResource IconSources={StaticResource IconSources}, IconRelativePath=16/open.png}" IsSelectable="false" AutomationProperties.Name="Open Document" telerik:RadRichTextBoxRibbonUI.RichTextCommand="{Binding OpenDocumentCommand}"/>
                     <telerik:RadRibbonBackstageItem Header="Save" Icon="{telerik:IconResource IconSources={StaticResource IconSources}, IconRelativePath=16/save.png}" IsSelectable="false" AutomationProperties.Name="Save Document" telerik:RadRichTextBoxRibbonUI.RichTextCommand="{Binding SaveCommand}"/>
@@ -919,6 +917,7 @@
             </telerik:RadRibbonTab>
         </telerik:RadRichTextBoxRibbonUI>
         <telerik:RadRichTextBoxStatusBar  Grid.Column="2" AssociatedRichTextBox="{Binding ElementName=radRichTextBox}" Grid.Row="2"/>
+        <ContentControl x:Name="RendererPlaceHolder" Grid.Row="1" Grid.Column="0" />
     </Grid>
 
 </telerik:RadWindow>

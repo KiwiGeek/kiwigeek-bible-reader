@@ -69,7 +69,7 @@ namespace KiwiGeekBible.WPF
 
         private void radRichTextBox_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Space || e.Key == Key.Enter)
+            if (e.Key == Key.Space)
             {
 
                 double originalOffset = radRichTextBox.VerticalOffset;
@@ -237,5 +237,15 @@ namespace KiwiGeekBible.WPF
             }
         }
 
+
+        private void FrameworkElement_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            RendererPlaceHolder.Visibility = Visibility.Hidden;
+        }
+
+        private void FrameworkElement_OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            RendererPlaceHolder.Visibility = Visibility.Visible;
+        }
     }
 }
