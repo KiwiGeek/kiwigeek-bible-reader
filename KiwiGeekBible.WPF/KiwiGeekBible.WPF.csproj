@@ -7,7 +7,7 @@
     <EnableDefaultItems>False</EnableDefaultItems>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;VERSES_AS_PROSE</DefineConstants>
+    <DefineConstants>TRACE;VERSES_AS_PROSE;</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

@@ -57,7 +57,7 @@ namespace KiwiGeekBible.WPF.BibleRenderer
                     chapterHTML += $"<h3>{verse.SectionTitle}</h3>";
                 }
 
-#if !VERSES_AS_PROSE
+#if VERSES_AS_PROSE
                 if (verse.StartsParagraph)
                 {
                     chapterHTML += "<p>";
@@ -66,11 +66,11 @@ namespace KiwiGeekBible.WPF.BibleRenderer
                 if (verse.VerseText.StartsWith("<br />"))
                 {
                     verse.VerseText = verse.VerseText.Substring(6, verse.VerseText.Length - 6);
-                    chapterHTML += $"<br /><b>{verse.VerseNumber}</b>&nbsp;{verse.VerseText}";
+                    chapterHTML += $"<br /><b id=\"v{verse.VerseNumber}\">{verse.VerseNumber}</b>&nbsp;{verse.VerseText}";
                 }
                 else
                 {
-                    chapterHTML += $"<b>{verse.VerseNumber}</b>&nbsp;{verse.VerseText}";
+                    chapterHTML += $"<b id=\"v{verse.VerseNumber}\">{verse.VerseNumber}</b>&nbsp;{verse.VerseText}";
                 }
 
 
