@@ -69,7 +69,7 @@ namespace KiwiGeekBible.WPF
 
         private void radRichTextBox_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Space)
+            if (e.Key == Key.Space || e.Key==Key.Enter || e.Key == Key.Return)
             {
 
                 double originalOffset = radRichTextBox.VerticalOffset;
@@ -77,6 +77,14 @@ namespace KiwiGeekBible.WPF
                 using (DocumentPosition originalCaretPosition =
                     new DocumentPosition(this.radRichTextBox.Document.CaretPosition, true))
                 {
+
+                    // if the key was enter (or return), we want to scan the previous paragraph, so temporarily move
+                    // the cursor back up a paragraph. Don't worry, it'll be restored correctly at the end.
+                    if (e.Key == Key.Enter || e.Key == Key.Return)
+                    {
+                        radRichTextBox.Document.CaretPosition.MoveToPreviousParagraphEnd();
+                    }
+
                     Paragraph currentParagraph = radRichTextBox.Document.CaretPosition.GetCurrentParagraph();
 
                     // remove any extant links, so that we can reparse them
@@ -149,10 +157,12 @@ namespace KiwiGeekBible.WPF
                     radRichTextBox.Document.CaretPosition.MoveToPosition(originalCaretPosition);
                     radRichTextBox.Document.Selection.Ranges.Clear();
                     radRichTextBox.ActiveEditorPresenter.ScrollToVerticalOffset(originalOffset - originalY + this.radRichTextBox.Document.CaretPosition.Location.Y);
+
+                    radRichTextBox.UpdateEditorLayout(false);
                 }
 
             }
-            radRichTextBox.UpdateEditorLayout(false);
+
 
         }
 
