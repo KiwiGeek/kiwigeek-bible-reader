@@ -16,7 +16,7 @@ namespace KiwiGeekBible.WPF
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            StyleManager.ApplicationTheme = new Office2019Theme();
+            StyleManager.ApplicationTheme = new Office2019Theme( Office2019Palette.ColorVariation.Gray);
             MainWindow window = new MainWindow();
             window.Show();
         }

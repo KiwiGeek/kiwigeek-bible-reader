@@ -25,7 +25,7 @@
 
         <GridSplitter Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Width="3" VerticalAlignment="Stretch" ResizeBehavior="PreviousAndNext" Background="Gainsboro" />
 
-        <telerik:DocumentRuler Grid.Row="1" Grid.Column="2">
+        <telerik:DocumentRuler Grid.Row="1" Grid.Column="0">
             <telerik:RadRichTextBox x:Name="radRichTextBox" IsSelectionMiniToolBarEnabled="True" IsSpellCheckingEnabled="True" IsContextMenuEnabled="True" LayoutMode="Paged" 
                                         KeyUp="radRichTextBox_KeyUp" HyperlinkClicked="RadRichTextBox_OnHyperlinkClicked" HyperlinkNavigationMode="Click" />
         </telerik:DocumentRuler>
@@ -916,8 +916,8 @@
                 </telerik:RadRibbonGroup>
             </telerik:RadRibbonTab>
         </telerik:RadRichTextBoxRibbonUI>
-        <telerik:RadRichTextBoxStatusBar  Grid.Column="2" AssociatedRichTextBox="{Binding ElementName=radRichTextBox}" Grid.Row="2"/>
-        <ContentControl x:Name="RendererPlaceHolder" Grid.Row="1" Grid.Column="0" />
+        <telerik:RadRichTextBoxStatusBar  Grid.Column="0" AssociatedRichTextBox="{Binding ElementName=radRichTextBox}" Grid.Row="2"/>
+        <ContentControl x:Name="RendererPlaceHolder" Grid.Row="1" Grid.Column="2"  Grid.RowSpan="2"/>
     </Grid>
 
 </telerik:RadWindow>
