@@ -10,7 +10,7 @@ namespace KiwiGeekBible.WPF.BibleRenderer
 {
     internal interface IBibleRenderer
     {
-        void NavigateToScripture(BibleReference reference);
+        Task NavigateToScripture(BibleReference reference);
         void HighlightScriptureRange(BibleReference start, BibleReference end);
     }
 }

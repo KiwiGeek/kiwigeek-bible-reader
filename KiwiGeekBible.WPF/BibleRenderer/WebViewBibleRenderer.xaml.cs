@@ -1,6 +1,7 @@
 ﻿using KiwiGeekBible.WPF.Classes;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -23,9 +24,10 @@ namespace KiwiGeekBible.WPF.BibleRenderer
             throw new NotImplementedException();
         }
 
-        public void NavigateToScripture(BibleReference reference)
+        public async Task NavigateToScripture(BibleReference reference)
         {
             RenderChapter(reference.Book, uint.Parse(reference.Chapter));
+            await WebView2.ExecuteScriptAsync($"document.getElementById(\"v{reference.Verse}\").scrollIntoView();");
         }
 
         private async void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -82,7 +84,7 @@ namespace KiwiGeekBible.WPF.BibleRenderer
                 {
                     scrubbedVerse = scrubbedVerse.Substring(6);
                 }
-                chapterHTML += $"<p><b>{verse.VerseNumber}</b>&nbsp;{scrubbedVerse}&nbsp;&nbsp;</p>";
+                chapterHTML += $"<p id=\"v{verse.VerseNumber}\"><b>{verse.VerseNumber}</b>&nbsp;{scrubbedVerse}&nbsp;&nbsp;</p>";
 #endif
 
 
