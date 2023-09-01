@@ -11,9 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.5" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.774.44" />
-    <PackageReference Include="Telerik.UI.for.Wpf.NetCore.Xaml" Version="2021.1.325" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.10" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1938.49" />
+    <PackageReference Include="Telerik.UI.for.Wpf.70.Xaml" Version="2023.2.718" />
   </ItemGroup>
   
   <ItemGroup>
